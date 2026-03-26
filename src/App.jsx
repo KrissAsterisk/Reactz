@@ -28,7 +28,7 @@ function App() {
             </h1>
             <label htmlFor="search">Search: </label>
             <input id="search" type="text" />
-        </div>z
+        </div>
 
     )
 }
