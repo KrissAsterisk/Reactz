@@ -76,11 +76,16 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => { /* Properties c
 }
 
 const SearchBar = ({ arrayOfWebPageData }) => {
-
-
     const [searchTerm, setSearchTerm] = React.useState('');
-    function displayText(searchTerm) {
-        if (searchTerm ?? null) return <p>Looking for: {searchTerm}</p>
+    function displayAndSearchText(searchTerm, { arrayOfWebPageData }) {
+        if (searchTerm ?? null) {
+            return (
+                <div>
+                    <p>Looking for: {searchTerm}</p>
+                    <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
+                </div>
+            )
+        }
     }
 
     const handleChange = (event) => {
@@ -93,8 +98,7 @@ const SearchBar = ({ arrayOfWebPageData }) => {
         <div>
             <label htmlFor="search">Search: </label>
             <input id="search" type="text" onChange={handleChange} />
-            {displayText(searchTerm)}
-            <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
+            {displayAndSearchText(searchTerm, { arrayOfWebPageData })}
         </div>
     )
 }
