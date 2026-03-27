@@ -1,36 +1,20 @@
+
 const title = {
     name: "Reactz",
     introduction: "Presents",
-    body: "Welcome to my page!"
+    body: `Welcome to my page`
 };
 
-const list = [{
-    title: "Reactz",
-    url: "localhost:9090",
-    author: "me",
-    num_comments: 3,
-    points: 4,
-    gayness: 100,
-    objectId: 0,
-},
-{
-    title: "AuthServer",
-    url: "authserver:9000",
-    author: "admin",
-    num_comments: 0,
-    points: 999,
-    objectId: 1,
-},
-{
-    title: "AnotherAddition",
-    url: "0.0.0.0:0000",
-    author: "TBD",
-    num_comments: null,
-    points: null,
-    objectId: 2
+class User {
+    constructor(firstName, lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 
-}];
-
+    get fullName() {
+        return this.firstName + " " + this.lastName;
+    }
+}
 
 
 let jsArray = [`el1`, `el2`, `el3`];
@@ -38,6 +22,32 @@ let makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
 
 function List() {
+    const list = [{
+        title: "Reactz",
+        url: "localhost:9090",
+        author: "me",
+        num_comments: 3,
+        points: 4,
+        gayness: 100,
+        objectId: 0,
+    },
+    {
+        title: "AuthServer",
+        url: "authserver:9000",
+        author: "admin",
+        num_comments: 0,
+        points: 999,
+        objectId: 1,
+    },
+    {
+        title: "AnotherAddition",
+        url: "0.0.0.0:0000",
+        author: "TBD",
+        num_comments: null,
+        points: null,
+        objectId: 2
+
+    }];
     return (
         <ul>
             {
@@ -54,7 +64,7 @@ function List() {
                             }
                             case "objectId": break;
                             case "title": break;
-                            default: delistedItems.push(<ul><li>{`${key}: ${item[key]} \n`}</li></ul>)
+                            default: delistedItems.push(<ul><li key={key}>{`${key}: ${item[key]} \n`}</li></ul>)
                         }
                     }
 
@@ -83,11 +93,12 @@ function Search() {
 function App() {
 
     console.log(makeNoise());
+    let newUser = new User("John", "Timothy");
 
     return (
         <div>
             <h1>{title.name} {title.introduction}:</h1>
-            <h1>{title.body}</h1>
+            <h1>{title.body}, {newUser.fullName}!</h1>
 
             <Search />
             <h1>
