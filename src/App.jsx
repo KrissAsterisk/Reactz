@@ -21,65 +21,51 @@ const jsArray = [`el1`, `el2`, `el3`];
 const makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
 
-const List = () => {
-    const list = [{
-        title: "Reactz",
-        url: "localhost:9090",
-        author: "me",
-        num_comments: 3,
-        points: 4,
-        gayness: 100,
-        objectId: 0,
-    },
-    {
-        title: "AuthServer",
-        url: "authserver:9000",
-        author: "admin",
-        num_comments: 0,
-        points: 999,
-        objectId: 1,
-    },
-    {
-        title: "AnotherAddition",
-        url: "0.0.0.0:0000",
-        author: "TBD",
-        num_comments: null,
-        points: null,
-        objectId: 2
+const PageListItemFilter = ({ item }) => { /* Of course this is redundant and doesn't
+                                              even increase readability, but it's
+                                              here to help visualize how props, aka properties,
+                                              can be transmitted */
+                                              // will be removed from main branch
 
-    }];
+    let delistedItems = [];
+    for (let key in item) {
+        switch (key) {
+            case "url": {
+                var linkToUrl = <a key={item.objectId} href={`http://${item[key]}`}>{item.title}:</a>;
+                delistedItems.push(linkToUrl);
+                break;
+            }
+            case "objectId": break;
+            case "title": break;
+            default: delistedItems.push(<ul key={key}><li>{`${key}: ${item[key]} \n`}</li></ul>)
+        }
+    }
+
+    return <li> {delistedItems} </li>
+}
+
+const PageListItem = ({ thisVarCanBeAnything: item }) => {
+
+    return <PageListItemFilter item={item} />
+}
+
+const PageList = ({ list: arrayOfWebPageData }) => { /* as discovered later, the parameter passed onto the method can be anything;
+                                                    however, there seem to be params that change what is passed on;
+                                                    such is the case with list = {} here;
+                                                    ---------------------------------------
+                                                    need to extract the arrayList out of the list 
+                                                    that was created when passed to List using
+                                                    list = {var}. */
     return (
         <ul>
             {
-                list.map((item) => {
-
-                    let delistedItems = [];
-
-                    for (let key in item) {
-                        switch (key) {
-                            case "url": {
-                                var linkToUrl = <a href={`http://${item[key]}`}>{item.title}:</a>;
-                                delistedItems.push(linkToUrl);
-                                break;
-                            }
-                            case "objectId": break;
-                            case "title": break;
-                            default: delistedItems.push(<ul><li key={key}>{`${key}: ${item[key]} \n`}</li></ul>)
-                        }
-                    }
-
-                    return <li key={item.objectId}>
-
-                        {delistedItems}
-
-                    </li>
-
-                })
+                arrayOfWebPageData.map((item) => <PageListItem key={item.objectId} thisVarCanBeAnything={item} />) // suboptimal identifier chosen to prove a point
 
             }
         </ul>
     )
 }
+
 
 const Search = () => {
 
@@ -109,6 +95,33 @@ const Search = () => {
 
 const App = () => {
 
+    const listOfWebPageData = [{
+        title: "Reactz",
+        url: "localhost:9090",
+        author: "me",
+        num_comments: 3,
+        points: 4,
+        perfection: 100,
+        objectId: 0,
+    },
+    {
+        title: "AuthServer",
+        url: "authserver:9000",
+        author: "admin",
+        num_comments: 0,
+        points: 999,
+        objectId: 1,
+    },
+    {
+        title: "AnotherAddition",
+        url: "0.0.0.0:0000",
+        author: "TBD",
+        num_comments: null,
+        points: null,
+        objectId: 2
+
+    }];
+
     console.log(makeNoise());
     const newUser = new User("John", "Timothy");
 
@@ -124,7 +137,7 @@ const App = () => {
 
                 }
             </h1>
-            <List />
+            <PageList list={listOfWebPageData} />
         </div>
 
     )
