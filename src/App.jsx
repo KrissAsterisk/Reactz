@@ -21,7 +21,7 @@ let jsArray = [`el1`, `el2`, `el3`];
 let makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
 
-function List() {
+let List = () => {
     const list = [{
         title: "Reactz",
         url: "localhost:9090",
@@ -81,7 +81,7 @@ function List() {
     )
 }
 
-function Search() {
+let Search = () => {
     return (
         <div>
             <label htmlFor="search">Search: </label>
@@ -90,7 +90,7 @@ function Search() {
     )
 }
 
-function App() {
+let App = () => {
 
     console.log(makeNoise());
     let newUser = new User("John", "Timothy");
