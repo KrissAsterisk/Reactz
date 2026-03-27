@@ -1,3 +1,4 @@
+import * as React from 'react';
 
 const title = {
     name: "Reactz",
@@ -17,7 +18,7 @@ class User {
 }
 
 
-const jsArray = [`el1`, `el2`, `el3`];
+const jsArray = [`--1`, `--2`, `--3`];
 const makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
 
@@ -37,14 +38,10 @@ const PageListItem = ({ item }) => {
         }
     }
 
-    return <li>
-
-        {delistedItems}
-
-    </li>
+    return <li> {delistedItems} </li>
 }
 
-const PageList = ({arrayOfWebPageData }) => {
+const PageList = ({ arrayOfWebPageData }) => {
     return (
         <ul>
             {
@@ -55,36 +52,56 @@ const PageList = ({arrayOfWebPageData }) => {
     )
 }
 
+const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => { /* Properties come as one {var1, var2, ...}*/
+    let matches = [];
 
-const Search = () => {
+    let checkEveryItem = (item) => {
+        for (let key in item) {
+            if (searchTerm === key) {
+                matches.push(item[searchTerm]);
+            }
+        }
+    }
+    arrayOfWebPageData.forEach(item => checkEveryItem(item));
+
+    return (
+        <ul>
+            {matches.map(
+                (match, index) =>
+                    <li key={index}>{match}</li>
+            )}
+        </ul>
+    )
+
+}
+
+const SearchBar = ({ arrayOfWebPageData }) => {
+
+
+    const [searchTerm, setSearchTerm] = React.useState('');
+    function displayText(searchTerm) {
+        if (searchTerm ?? null) return <p>Looking for: {searchTerm}</p>
+    }
 
     const handleChange = (event) => {
 
-        console.log(event);
+        setSearchTerm(event.target.value);
 
-
-        console.log(event.target.value)
-    }
-
-    const handleClick = (event) => {
-
-        console.log(event)
-
-        console.log("Clicked on Search Box!")
-     
     }
 
     return (
         <div>
             <label htmlFor="search">Search: </label>
-            <input id="search" type="text" onChange={handleChange} onClick={handleClick} />
+            <input id="search" type="text" onChange={handleChange} />
+            {displayText(searchTerm)}
+            <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
         </div>
     )
 }
 
 const App = () => {
 
-    const listOfWebPageData = [{
+    const arrayOfWebPageData = [{
         title: "Reactz",
         url: "localhost:9090",
         author: "me",
@@ -119,14 +136,14 @@ const App = () => {
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {newUser.fullName}!</h1>
 
-            <Search />
+            <SearchBar arrayOfWebPageData={arrayOfWebPageData} />
             <h1>
                 {
                     jsArray.map((item) => item.replace(item.charAt(item.length - 1), "X"))
 
                 }
             </h1>
-            <PageList arrayOfWebPageData={listOfWebPageData} />
+            <PageList arrayOfWebPageData={arrayOfWebPageData} />
         </div>
 
     )
