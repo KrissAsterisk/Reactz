@@ -17,11 +17,11 @@ class User {
 }
 
 
-let jsArray = [`el1`, `el2`, `el3`];
-let makeNoise = () => "AAAAAAAAAAAAAAAAH";
+const jsArray = [`el1`, `el2`, `el3`];
+const makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
 
-let List = () => {
+const List = () => {
     const list = [{
         title: "Reactz",
         url: "localhost:9090",
@@ -81,19 +81,36 @@ let List = () => {
     )
 }
 
-let Search = () => {
+const Search = () => {
+
+    const handleChange = (event) => {
+
+        console.log(event);
+
+
+        console.log(event.target.value)
+    }
+
+    const handleClick = (event) => {
+
+        console.log(event)
+
+        console.log("Clicked on Search Box!")
+        event.stopPropagation(); // for testing rm l8r - stops any other handles that run this same function
+    }
+
     return (
         <div>
             <label htmlFor="search">Search: </label>
-            <input id="search" type="text" />
+            <input id="search" type="text" onChange={handleChange} onClick={handleClick} onClickCapture={handleClick} />
         </div>
     )
 }
 
-let App = () => {
+const App = () => {
 
     console.log(makeNoise());
-    let newUser = new User("John", "Timothy");
+    const newUser = new User("John", "Timothy");
 
     return (
         <div>
