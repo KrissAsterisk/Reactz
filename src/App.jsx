@@ -54,7 +54,6 @@ const PageList = ({ arrayOfWebPageData }) => {
 
 const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     let matches = [];
-
     let checkEveryItem = (item) => {
         for (let key in item) {
             if (searchTerm === key) {
@@ -64,41 +63,23 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     }
     arrayOfWebPageData.forEach(item => checkEveryItem(item));
 
+    let displayMatches = (matches) => matches.map((value, index) => <li key={index}>{value}</li>)
+
     return (
         <ul>
-            {matches.map(
-                (match, index) =>
-                    <li key={index}>{match}</li>
-            )}
+            {
+                displayMatches(matches)
+            }
         </ul>
     )
-
 }
 
-const SearchBar = ({ arrayOfWebPageData }) => {
-    const [searchTerm, setSearchTerm] = React.useState('');
-    function displayAndSearchText(searchTerm, { arrayOfWebPageData }) {
-        if (searchTerm ?? null) {
-            return (
-                <div>
-                    <p>Looking for: {searchTerm}</p>
-                    <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
-                </div>
-            )
-        }
-    }
-
-    const handleSearch = (event) => {
-
-        setSearchTerm(event.target.value);
-
-    }
+const SearchBar = ({ onSearch }) => {
 
     return (
         <div>
             <label htmlFor="search">Search: </label>
-            <input id="search" type="text" onChange={handleSearch} />
-            {displayAndSearchText(searchTerm, { arrayOfWebPageData })}
+            <input id="search" type="text" onChange={onSearch} />
         </div>
     )
 }
@@ -152,8 +133,14 @@ const App = () => {
 
     }];
 
+    const [searchTerm, setSearchTerm] = React.useState('');
+
+    const handleSearch = (event) => { // this is called lifting state
+
+        setSearchTerm(event.target.value);
+
+    }
     console.log(makeNoise());
-    //alert("Welcome new User!");
     const [user, setUser] = React.useState(null); // create a stateful var
 
     let handleUserCreation = (newUser) => { /* callback func, called with onUserCreation() from child component;
@@ -161,18 +148,29 @@ const App = () => {
                                             */
         setUser(newUser);
     }
+
+    let displayLookingForText = (searchTerm) => {
+        if (searchTerm ?? null) {
+            return <p>Looking for: {searchTerm}</p>
+        }
+    }
+
     return (
         <div>
-            <CreateUser onUserCreation={handleUserCreation} /> /* call child component HERE - initialize user;
+            <CreateUser onUserCreation={handleUserCreation} /> {/* call child component HERE - initialize user;
                                                                   create/define the callback function for both the parent and child;
                                                                   aka passing the reference of handleCreation() to the child
                                                                   with the name of onUserCreation so that when it calls it, it runs
                                                                   inside the Parent comp;
-                                                               */
+                                                               */}
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {user?.fullName}!</h1>
 
-            <SearchBar arrayOfWebPageData={arrayOfWebPageData} />
+            <SearchBar onSearch={handleSearch} />
+            {
+                displayLookingForText(searchTerm)
+            }
+            <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
             <h1>
                 {
                     jsArray.map((item) => item.replace(item.charAt(item.length - 1), "X"))
