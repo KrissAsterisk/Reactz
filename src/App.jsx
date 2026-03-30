@@ -75,12 +75,12 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     )
 }
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({ searchTerm, onSearch }) => {
 
     return (
         <div>
             <label htmlFor="search">Search: </label>
-            <input id="search" type="text" onChange={onSearch} />
+            <input id="search" type="text" value={searchTerm} onChange={onSearch} />
         </div>
     )
 }
@@ -100,7 +100,7 @@ const CreateUser = ({ onUserCreation }) => {
             promptForName("Please enter your surname: ")
         );
         onUserCreation(newUser);
-    })
+    }, []);
 
     return null;
 }
@@ -108,45 +108,45 @@ const CreateUser = ({ onUserCreation }) => {
 const App = () => {
 
     const arrayOfWebPageData = [
-    {
-        title: "Reactz",
-        url: "localhost:9090",
-        author: "me",
-        num_comments: 3,
-        points: 4,
-        perfection: 100,
-        objectId: 0,
-    },
-    {
-        title: "AuthServer",
-        url: "authserver:9000",
-        author: "admin",
-        num_comments: 0,
-        points: 999,
-        objectId: 1,
-    },
-    {
-        title: "AnotherAddition",
-        url: "0.0.0.0:0000",
-        author: "TBD",
-        num_comments: null,
-        points: null,
-        objectId: 2
+        {
+            title: "Reactz",
+            url: "localhost:9090",
+            author: "me",
+            num_comments: 3,
+            points: 4,
+            perfection: 100,
+            objectId: 0,
+        },
+        {
+            title: "AuthServer",
+            url: "authserver:9000",
+            author: "admin",
+            num_comments: 0,
+            points: 999,
+            objectId: 1,
+        },
+        {
+            title: "AnotherAddition",
+            url: "0.0.0.0:0000",
+            author: "TBD",
+            num_comments: null,
+            points: null,
+            objectId: 2
 
-    },
-    {
-        title: "ANDANOTHER",
-        url: "0.0.0.0:0000",
-        author: "TBD",
-        num_comments: null,
-        points: null,
-        objectId: 3
-    }
+        },
+        {
+            title: "ANDANOTHER",
+            url: "0.0.0.0:0000",
+            author: "TBD",
+            num_comments: null,
+            points: null,
+            objectId: 3
+        }
     ];
 
-    const [searchTerm, setSearchTerm] = React.useState('');
+    const [searchTerm, setSearchTerm] = React.useState("react");
 
-    const handleSearch = (event) => { // this is called lifting state
+    const handleSearch = (event) => { // this is called lifting state (pulling it out of child component)
         setSearchTerm(event.target.value.toLowerCase());
     }
     console.log(makeNoise());
@@ -175,7 +175,7 @@ const App = () => {
 
     return (
         <div>
-            <CreateUser onUserCreation={handleUserCreation} /> {/* call child component HERE - initialize user;
+             <CreateUser onUserCreation={handleUserCreation} /> {/* call child component HERE - initialize user;
                                                                   create/define the callback function for both the parent and child;
                                                                   aka passing the reference of handleCreation() to the child
                                                                   with the name of onUserCreation so that when it calls it, it runs
@@ -184,7 +184,7 @@ const App = () => {
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {user?.fullName}!</h1>
 
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
             {
                 displayLookingForTextAndResults(searchTerm)
             }
