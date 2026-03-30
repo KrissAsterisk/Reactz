@@ -107,7 +107,8 @@ const CreateUser = ({ onUserCreation }) => {
 
 const App = () => {
 
-    const arrayOfWebPageData = [{
+    const arrayOfWebPageData = [
+    {
         title: "Reactz",
         url: "localhost:9090",
         author: "me",
@@ -132,12 +133,21 @@ const App = () => {
         points: null,
         objectId: 2
 
-    }];
+    },
+    {
+        title: "ANDANOTHER",
+        url: "0.0.0.0:0000",
+        author: "TBD",
+        num_comments: null,
+        points: null,
+        objectId: 3
+    }
+    ];
 
     const [searchTerm, setSearchTerm] = React.useState('');
 
     const handleSearch = (event) => { // this is called lifting state
-        setSearchTerm(event.target.value);
+        setSearchTerm(event.target.value.toLowerCase());
     }
     console.log(makeNoise());
     const [user, setUser] = React.useState(null); // create a stateful var
@@ -148,16 +158,20 @@ const App = () => {
         setUser(newUser);
     }
 
+
+
     let displayLookingForTextAndResults = (searchTerm) => {
         if (searchTerm ?? null) {
             return (
                 <div>
                     <p>Looking for: {searchTerm}</p>
-                    <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
+                    <ValidateSearch searchTerm={searchTerm} arrayOfWebPageData={arrayOfWebPageData} />
                 </div>
             )
         }
     }
+
+    const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
 
     return (
         <div>
@@ -180,7 +194,7 @@ const App = () => {
 
                 }
             </h1>
-            <PageList arrayOfWebPageData={arrayOfWebPageData} />
+            <PageList arrayOfWebPageData={soughtList} />
         </div>
 
     )
