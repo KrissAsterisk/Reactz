@@ -53,15 +53,6 @@ const PageList = ({ arrayOfWebPageData }) => {
 }
 
 const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
-    //let matches = [];
-    //let checkEveryItem = (item) => {
-    //    for (let key in item) {
-    //        if (searchTerm === key) {
-    //            matches.push(item[searchTerm]);
-    //        }
-    //    }
-    //}
-    //arrayOfWebPageData.forEach(item => checkEveryItem(item));
     let matches = arrayOfWebPageData.filter(value => value[searchTerm] ?? null)
 
     let displayMatches = (matches) => matches.map((value, index) => <li key={index}>{value[searchTerm]}</li>)
@@ -94,7 +85,7 @@ const CreateUser = ({ onUserCreation }) => {
         return userInput;
     }
 
-    React.useEffect(() => { // needed useEffect() here since CreateUser is called mid-render, causing an error
+    React.useEffect(() => { 
         const newUser = new User(
             promptForName("Please enter your nickname: "),
             promptForName("Please enter your surname: ")
@@ -146,15 +137,13 @@ const App = () => {
 
     const [searchTerm, setSearchTerm] = React.useState("react");
 
-    const handleSearch = (event) => { // this is called lifting state (pulling it out of child component)
+    const handleSearch = (event) => { 
         setSearchTerm(event.target.value.toLowerCase());
     }
     console.log(makeNoise());
-    const [user, setUser] = React.useState(null); // create a stateful var
+    const [user, setUser] = React.useState(null); 
 
-    let handleUserCreation = (newUser) => { /* callback func, called with onUserCreation() from child component;
-                                               it sets the stateful user var to the value passed to handleUserCreation from child 'CreateUser'
-                                            */
+    let handleUserCreation = (newUser) => {
         setUser(newUser);
     }
 
@@ -175,12 +164,7 @@ const App = () => {
 
     return (
         <div>
-             <CreateUser onUserCreation={handleUserCreation} /> {/* call child component HERE - initialize user;
-                                                                  create/define the callback function for both the parent and child;
-                                                                  aka passing the reference of handleCreation() to the child
-                                                                  with the name of onUserCreation so that when it calls it, it runs
-                                                                  inside the Parent comp;
-                                                               */}
+             <CreateUser onUserCreation={handleUserCreation} /> 
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {user?.fullName}!</h1>
 
