@@ -84,20 +84,20 @@ const CreateUser = ({ onUserCreation }) => {
         } while (userInput == '' || userInput == undefined)
         return userInput;
     }
-
-    React.useEffect(() => { 
-        const newUser = new User(
+    React.useEffect(() => {
+        const newUser = (new User(
             promptForName("Please enter your nickname: "),
             promptForName("Please enter your surname: ")
-        );
+        ));
+        localStorage.setItem('user', JSON.stringify(newUser));
         onUserCreation(newUser);
-    }, []);
+    }, [onUserCreation]);
 
     return null;
 }
 
 const App = () => {
-
+    console.log(makeNoise());
     const arrayOfWebPageData = [
         {
             title: "Reactz",
@@ -135,19 +135,26 @@ const App = () => {
         }
     ];
 
-    const [searchTerm, setSearchTerm] = React.useState("react");
+    const [searchTerm, setSearchTerm] = React.useState(localStorage.getItem('search') || 'react');
 
-    const handleSearch = (event) => { 
+    const handleSearch = (event) => {
         setSearchTerm(event.target.value.toLowerCase());
     }
-    console.log(makeNoise());
-    const [user, setUser] = React.useState(null); 
+
+    React.useEffect(() => {
+        localStorage.setItem('search', searchTerm);
+    }, [searchTerm])
+
+    const [user, setUser] = React.useState(() => {
+        const stored = localStorage.getItem('user');
+        if (!stored) return null;
+        const parsed = JSON.parse(stored);
+        return new User(parsed.firstName, parsed.lastName);
+    });
 
     let handleUserCreation = (newUser) => {
         setUser(newUser);
     }
-
-
 
     let displayLookingForTextAndResults = (searchTerm) => {
         if (searchTerm ?? null) {
@@ -160,11 +167,20 @@ const App = () => {
         }
     }
 
+    let isUserInit = (user) => {
+        if (!user) {
+            return <CreateUser onUserCreation={handleUserCreation} />
+
+        }
+    }
+
     const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
 
     return (
         <div>
-             <CreateUser onUserCreation={handleUserCreation} /> 
+            {
+                isUserInit(user)
+            }
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {user?.fullName}!</h1>
 
