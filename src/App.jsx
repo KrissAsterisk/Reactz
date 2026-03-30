@@ -52,7 +52,7 @@ const PageList = ({ arrayOfWebPageData }) => {
     )
 }
 
-const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => { /* Properties come as one {var1, var2, ...}*/
+const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     let matches = [];
 
     let checkEveryItem = (item) => {
@@ -88,7 +88,7 @@ const SearchBar = ({ arrayOfWebPageData }) => {
         }
     }
 
-    const handleChange = (event) => {
+    const handleSearch = (event) => {
 
         setSearchTerm(event.target.value);
 
@@ -97,10 +97,30 @@ const SearchBar = ({ arrayOfWebPageData }) => {
     return (
         <div>
             <label htmlFor="search">Search: </label>
-            <input id="search" type="text" onChange={handleChange} />
+            <input id="search" type="text" onChange={handleSearch} />
             {displayAndSearchText(searchTerm, { arrayOfWebPageData })}
         </div>
     )
+}
+
+const CreateUser = ({ onUserCreation }) => {
+    let promptForName = (promptMsg) => {
+        let userInput;
+        do {
+            userInput = prompt(promptMsg);
+        } while (userInput === null || undefined)
+        return userInput;
+    }
+
+    React.useEffect(() => { // needed useEffect() here since CreateUser is called mid-render, causing an error
+        const newUser = new User(
+            promptForName("Please enter your nickname: "),
+            promptForName("Please enter your surname: ")
+        );
+        onUserCreation(newUser);
+    })
+
+    return null;
 }
 
 const App = () => {
@@ -133,12 +153,24 @@ const App = () => {
     }];
 
     console.log(makeNoise());
-    const newUser = new User("John", "Timothy");
+    //alert("Welcome new User!");
+    const [user, setUser] = React.useState(null); // create a stateful var
 
+    let handleUserCreation = (newUser) => { /* callback func, called with onUserCreation() from child component;
+                                               it sets the stateful user var to the value passed to handleUserCreation from child 'CreateUser'
+                                            */
+        setUser(newUser);
+    }
     return (
         <div>
+            <CreateUser onUserCreation={handleUserCreation} /> /* call child component HERE - initialize user;
+                                                                  create/define the callback function for both the parent and child;
+                                                                  aka passing the reference of handleCreation() to the child
+                                                                  with the name of onUserCreation so that when it calls it, it runs
+                                                                  inside the Parent comp;
+                                                               */
             <h1>{title.name} {title.introduction}:</h1>
-            <h1>{title.body}, {newUser.fullName}!</h1>
+            <h1>{title.body}, {user?.fullName}!</h1>
 
             <SearchBar arrayOfWebPageData={arrayOfWebPageData} />
             <h1>
