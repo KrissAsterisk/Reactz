@@ -89,7 +89,6 @@ const CreateUser = ({ onUserCreation }) => {
             promptForName("Please enter your nickname: "),
             promptForName("Please enter your surname: ")
         ));
-        localStorage.setItem('user', JSON.stringify(newUser));
         onUserCreation(newUser);
     }, [onUserCreation]);
 
@@ -135,25 +134,20 @@ const App = () => {
         }
     ];
 
-    const [searchTerm, setSearchTerm] = React.useState(localStorage.getItem('search') || 'react');
+    const useStorageState = (key, initialState) => {
+        const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
+
+        React.useEffect(() => {
+            localStorage.setItem(key, value);
+        }, [value, key])
+
+        return [value, setValue];
+    }
+
+    const [searchTerm, setSearchTerm] = useStorageState('search', '');
 
     const handleSearch = (event) => {
         setSearchTerm(event.target.value.toLowerCase());
-    }
-
-    React.useEffect(() => {
-        localStorage.setItem('search', searchTerm);
-    }, [searchTerm])
-
-    const [user, setUser] = React.useState(() => {
-        const stored = localStorage.getItem('user');
-        if (!stored) return null;
-        const parsed = JSON.parse(stored);
-        return new User(parsed.firstName, parsed.lastName);
-    });
-
-    let handleUserCreation = (newUser) => {
-        setUser(newUser);
     }
 
     let displayLookingForTextAndResults = (searchTerm) => {
@@ -167,6 +161,28 @@ const App = () => {
         }
     }
 
+    //--------------------------------------------------------------------------------------------------
+
+    const useJsonStorageConversion = (key) => { // use...()
+        const [value, setValue] = React.useState(() => { // must be declared
+            const stored = localStorage.getItem(key);
+            if (!stored) return null;
+            const parsed = JSON.parse(stored);
+            return new User(parsed.firstName, parsed.lastName);
+        });
+        React.useEffect(() => {
+            localStorage.setItem('user', JSON.stringify(value));
+        }, [value])
+
+        return [value, setValue]; // must be returned as array to be called a custom hook
+    }
+
+    const [user, setUser] = useJsonStorageConversion('user')
+
+    let handleUserCreation = (newUser) => {
+        setUser(newUser);
+    }
+
     let isUserInit = (user) => {
         if (!user) {
             return <CreateUser onUserCreation={handleUserCreation} />
@@ -175,6 +191,12 @@ const App = () => {
     }
 
     const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
+
+    let handleButton = () =>
+    {
+        localStorage.clear();
+        console.log("internal storage cleared.")
+    }
 
     return (
         <div>
@@ -194,6 +216,7 @@ const App = () => {
 
                 }
             </h1>
+            <p1>RESET: </p1><button onClick={handleButton}></button>
             <PageList arrayOfWebPageData={soughtList} />
         </div>
 
