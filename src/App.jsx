@@ -53,17 +53,18 @@ const PageList = ({ arrayOfWebPageData }) => {
 }
 
 const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
-    let matches = [];
-    let checkEveryItem = (item) => {
-        for (let key in item) {
-            if (searchTerm === key) {
-                matches.push(item[searchTerm]);
-            }
-        }
-    }
-    arrayOfWebPageData.forEach(item => checkEveryItem(item));
+    //let matches = [];
+    //let checkEveryItem = (item) => {
+    //    for (let key in item) {
+    //        if (searchTerm === key) {
+    //            matches.push(item[searchTerm]);
+    //        }
+    //    }
+    //}
+    //arrayOfWebPageData.forEach(item => checkEveryItem(item));
+    let matches = arrayOfWebPageData.filter(value => value[searchTerm] ?? null)
 
-    let displayMatches = (matches) => matches.map((value, index) => <li key={index}>{value}</li>)
+    let displayMatches = (matches) => matches.map((value, index) => <li key={index}>{value[searchTerm]}</li>)
 
     return (
         <ul>
@@ -89,7 +90,7 @@ const CreateUser = ({ onUserCreation }) => {
         let userInput;
         do {
             userInput = prompt(promptMsg);
-        } while (userInput === null || undefined)
+        } while (userInput == '' || userInput == undefined)
         return userInput;
     }
 
@@ -136,9 +137,7 @@ const App = () => {
     const [searchTerm, setSearchTerm] = React.useState('');
 
     const handleSearch = (event) => { // this is called lifting state
-
         setSearchTerm(event.target.value);
-
     }
     console.log(makeNoise());
     const [user, setUser] = React.useState(null); // create a stateful var
@@ -149,9 +148,14 @@ const App = () => {
         setUser(newUser);
     }
 
-    let displayLookingForText = (searchTerm) => {
+    let displayLookingForTextAndResults = (searchTerm) => {
         if (searchTerm ?? null) {
-            return <p>Looking for: {searchTerm}</p>
+            return (
+                <div>
+                    <p>Looking for: {searchTerm}</p>
+                    <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
+                </div>
+            )
         }
     }
 
@@ -168,9 +172,8 @@ const App = () => {
 
             <SearchBar onSearch={handleSearch} />
             {
-                displayLookingForText(searchTerm)
+                displayLookingForTextAndResults(searchTerm)
             }
-            <ValidateSearch searchTerm={searchTerm.toLowerCase()} arrayOfWebPageData={arrayOfWebPageData} />
             <h1>
                 {
                     jsArray.map((item) => item.replace(item.charAt(item.length - 1), "X"))
