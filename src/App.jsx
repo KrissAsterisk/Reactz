@@ -29,7 +29,7 @@ const PageListItem = ({ item }) => {
     for (let key in item) {
         switch (key) {
             case "url": {
-                var linkToUrl = <a key={item.objectId} href={`http://${item[key]}`}>{item.title}:</a>;
+                var linkToUrl = <a key={item.objectId} href={`http://${item[key]}`}>{item.title || null}:</a>;
                 delistedItems.push(linkToUrl);
                 break;
             }
@@ -67,13 +67,17 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     )
 }
 
-const InputWithLabel = ({ id, label, searchTerm, onInputChange, type = "text" }) => {
+const InputWithLabel = ({ id, searchTerm, type = "text" , onInputChange, children}) => {
 
     return (
         <React.Fragment>
-            <label htmlFor={id}>{label}: </label>
+            <label htmlFor={id}>{children}</label>
             &nbsp; {/* Non Breaking SPace - used for creating a space that prevents an automatic line break */}
             <input id={id} type={type} value={searchTerm} onChange={onInputChange} />
+            {React.Children.forEach(children, (child, index) => {
+                console.log(child);
+                console.log(index);
+            })}
         </React.Fragment>
     )
 }
@@ -235,6 +239,7 @@ const App = () => {
         setToggleValue(!toggleValue);
     }
 
+
     return (
         <div>
             {
@@ -243,7 +248,9 @@ const App = () => {
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {user?.fullName}!</h1>
 
-            <InputWithLabel id="search" label="Search" searchTerm={searchTerm} onInputChange={handleSearch} />
+            <InputWithLabel id="search" searchTerm={searchTerm} onInputChange={handleSearch} >
+                <strong>Search:</strong>{/* <-- children */}
+                </InputWithLabel>
             {
                 displayLookingForTextAndResults(searchTerm)
             }
