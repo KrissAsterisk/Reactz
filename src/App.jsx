@@ -22,6 +22,7 @@ const jsArray = [`--1`, `--2`, `--3`];
 const makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
 
+
 const PageListItem = ({ item }) => {
 
     let delistedItems = [];
@@ -77,18 +78,37 @@ const SearchBar = ({ searchTerm, onSearch }) => {
 }
 
 const CreateUser = ({ onUserCreation }) => {
-    let promptForName = (promptMsg) => {
+    const invalidInputCondition = (userInput) => {
+        if (userInput == '') {
+            return true;
+        }
+        return false;
+    }
+
+    const normalizeInput = (userInput) => {
+        return userInput?.replace(/ /g, "");
+    }
+    const persistantPrompt = (promptMsg) => {
         let userInput;
         do {
-            userInput = prompt(promptMsg);
-        } while (userInput == '' || userInput == undefined)
+            userInput = normalizeInput(prompt(promptMsg));
+        } while (invalidInputCondition(userInput))
         return userInput;
     }
+
+
+
     React.useEffect(() => {
-        const newUser = (new User(
-            promptForName("Please enter your nickname: "),
-            promptForName("Please enter your surname: ")
-        ));
+        let createUser = () => {
+            return new User(
+                persistantPrompt("Please enter your nickname: "),
+                persistantPrompt("Please enter your surname: ")
+            );
+        }
+        let newUser;
+        do {
+            newUser = createUser();
+        } while (newUser.firstName == undefined || newUser.lastName == undefined)
         onUserCreation(newUser);
     }, [onUserCreation]);
 
@@ -134,6 +154,7 @@ const App = () => {
         }
     ];
 
+    //------------------HOOK------------------------
     const useStorageState = (key, initialState) => {
         const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
 
@@ -143,6 +164,7 @@ const App = () => {
 
         return [value, setValue];
     }
+    //------------------HOOK------------------------
 
     const [searchTerm, setSearchTerm] = useStorageState('search', '');
 
@@ -163,12 +185,13 @@ const App = () => {
 
     //--------------------------------------------------------------------------------------------------
 
+    //------------------HOOK------------------------
     const useJsonStorageConversion = (key) => { // use...()
         const [value, setValue] = React.useState(() => { // must be declared
             const stored = localStorage.getItem(key);
             if (!stored) return null;
             const parsed = JSON.parse(stored);
-            return new User(parsed.firstName, parsed.lastName);
+            return new User(parsed?.firstName, parsed?.lastName);
         });
         React.useEffect(() => {
             localStorage.setItem('user', JSON.stringify(value));
@@ -176,8 +199,9 @@ const App = () => {
 
         return [value, setValue]; // must be returned as array to be called a custom hook
     }
+    //------------------HOOK------------------------
 
-    const [user, setUser] = useJsonStorageConversion('user')
+    const [user, setUser] = useJsonStorageConversion('user');
 
     let handleUserCreation = (newUser) => {
         setUser(newUser);
@@ -186,16 +210,25 @@ const App = () => {
     let isUserInit = (user) => {
         if (!user) {
             return <CreateUser onUserCreation={handleUserCreation} />
-
         }
     }
 
     const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
 
-    let handleButton = () =>
-    {
+    const [toggleValue, setToggleValue] = React.useState(() => {
+        return true
+    }, [])
+
+    const clearStorage = () => {
         localStorage.clear();
         console.log("internal storage cleared.")
+    }
+    const handle = {
+        false() { console.log("false") },
+        true() { clearStorage() }
+    };
+    const handleButton = () => {
+        setToggleValue(!toggleValue);
     }
 
     return (
@@ -216,7 +249,14 @@ const App = () => {
 
                 }
             </h1>
-            <p1>RESET: </p1><button onClick={handleButton}></button>
+            <p1>RESET_DATA:
+                <button onClick={handleButton}>AAH</button>
+                <p1> GET THIS MAN A {<button onClick={handle[toggleValue.toString()]}>{toggleValue.toString().toUpperCase()}</button>} </p1>
+            </p1>
+            {/*i know this looks atrocious
+            but its also so cool at the same time
+            RESETS data when the button is set to true
+            */}
             <PageList arrayOfWebPageData={soughtList} />
         </div>
 
