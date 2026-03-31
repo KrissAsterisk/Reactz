@@ -67,7 +67,7 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     )
 }
 
-const InputWithLabel = ({ id, searchTerm, isFocused, type = "text", onInputChange, children }) => {
+const InputWithLabel = ({ id, type = "text", searchTerm, isFocused, onInputChange, children }) => {
 
     const inputRef = React.useRef();
 
@@ -81,7 +81,7 @@ const InputWithLabel = ({ id, searchTerm, isFocused, type = "text", onInputChang
         <React.Fragment>
             <label htmlFor={id}>{children}</label>
             &nbsp; {/* Non Breaking SPace - used for creating a space that prevents an automatic line break */}
-            <input id={id} type={type} value={searchTerm} ref={inputRef} onChange={onInputChange} /> {/*autoFocus -> {true} byDefault*/} 
+            <input id={id} type={type} value={searchTerm} ref={inputRef} onChange={onInputChange} /> {/*autoFocus -> {true} byDefault*/}
             {React.Children.forEach(children, (child, index) => {
                 console.log(child);
                 console.log(index);
@@ -258,19 +258,19 @@ const App = () => {
 
             <InputWithLabel id="search" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
                 <strong>Search:</strong>{/* <-- children */}
-                </InputWithLabel>
+            </InputWithLabel>
             {
                 displayLookingForTextAndResults(searchTerm)
             }
-            <InputWithLabel id="search" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
+            <InputWithLabel id="search2" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
                 <strong>Search:</strong>{/* <-- children */}
-                </InputWithLabel>
+            </InputWithLabel>
             {
                 displayLookingForTextAndResults(searchTerm)
             }
-            <InputWithLabel id="search" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
+            <InputWithLabel id="search3" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
                 <strong>Search:</strong>{/* <-- children */}
-                </InputWithLabel>
+            </InputWithLabel>
             {
                 displayLookingForTextAndResults(searchTerm)
             }
