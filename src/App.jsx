@@ -70,10 +70,10 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
 const SearchBar = ({ searchTerm, onSearch }) => {
 
     return (
-        <div>
+        <React.Fragment>
             <label htmlFor="search">Search: </label>
             <input id="search" type="text" value={searchTerm} onChange={onSearch} />
-        </div>
+        </React.Fragment>
     )
 }
 
@@ -175,10 +175,11 @@ const App = () => {
     let displayLookingForTextAndResults = (searchTerm) => {
         if (searchTerm ?? null) {
             return (
-                <div>
+                
+                <> {/*<React.Fragment>*/}
                     <p>Looking for: {searchTerm}</p>
                     <ValidateSearch searchTerm={searchTerm} arrayOfWebPageData={arrayOfWebPageData} />
-                </div>
+                </> /*</React.Fragment>*/ 
             )
         }
     }
@@ -214,6 +215,8 @@ const App = () => {
     }
 
     const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
+
+    //------------------------------------------------------------------------
 
     const [toggleValue, setToggleValue] = React.useState(() => {
         return true
