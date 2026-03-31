@@ -67,13 +67,13 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     )
 }
 
-const InputWithLabel = ({ id, searchTerm, isFocused,  type = "text" , onInputChange, children}) => {
+const InputWithLabel = ({ id, searchTerm, isFocused, type = "text", onInputChange, children }) => {
 
     return (
         <React.Fragment>
             <label htmlFor={id}>{children}</label>
             &nbsp; {/* Non Breaking SPace - used for creating a space that prevents an automatic line break */}
-            <input id={id} type={type} value={searchTerm} autoFocus={isFocused} onChange={onInputChange} /> {/*autoFocus -> {true} byDefault*/} 
+            <input id={id} type={type} value={searchTerm} autoFocus={isFocused} onChange={onInputChange} /> {/*autoFocus -> {true} byDefault*/}
             {React.Children.forEach(children, (child, index) => {
                 console.log(child);
                 console.log(index);
@@ -239,7 +239,6 @@ const App = () => {
         setToggleValue(!toggleValue);
     }
 
-
     return (
         <div>
             {
@@ -250,7 +249,7 @@ const App = () => {
 
             <InputWithLabel id="search" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
                 <strong>Search:</strong>{/* <-- children */}
-                </InputWithLabel>
+            </InputWithLabel>
             {
                 displayLookingForTextAndResults(searchTerm)
             }
