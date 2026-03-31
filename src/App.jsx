@@ -67,12 +67,13 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     )
 }
 
-const SearchBar = ({ searchTerm, onSearch }) => {
+const InputWithLabel = ({ id, label, searchTerm, onInputChange, type = "text" }) => {
 
     return (
         <React.Fragment>
-            <label htmlFor="search">Search: </label>
-            <input id="search" type="text" value={searchTerm} onChange={onSearch} />
+            <label htmlFor={id}>{label}: </label>
+            &nbsp; {/* Non Breaking SPace - used for creating a space that prevents an automatic line break */}
+            <input id={id} type={type} value={searchTerm} onChange={onInputChange} />
         </React.Fragment>
     )
 }
@@ -175,11 +176,11 @@ const App = () => {
     let displayLookingForTextAndResults = (searchTerm) => {
         if (searchTerm ?? null) {
             return (
-                
+
                 <> {/*<React.Fragment>*/}
                     <p>Looking for: {searchTerm}</p>
                     <ValidateSearch searchTerm={searchTerm} arrayOfWebPageData={arrayOfWebPageData} />
-                </> /*</React.Fragment>*/ 
+                </> /*</React.Fragment>*/
             )
         }
     }
@@ -242,7 +243,7 @@ const App = () => {
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {user?.fullName}!</h1>
 
-            <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
+            <InputWithLabel id="search" label="Search" searchTerm={searchTerm} onInputChange={handleSearch} />
             {
                 displayLookingForTextAndResults(searchTerm)
             }
