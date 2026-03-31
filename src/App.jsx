@@ -67,13 +67,21 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     )
 }
 
-const InputWithLabel = ({ id, searchTerm, isFocused,  type = "text" , onInputChange, children}) => {
+const InputWithLabel = ({ id, searchTerm, isFocused, type = "text", onInputChange, children }) => {
+
+    const inputRef = React.useRef();
+
+    React.useEffect(() => {
+        if (isFocused && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isFocused])
 
     return (
         <React.Fragment>
             <label htmlFor={id}>{children}</label>
             &nbsp; {/* Non Breaking SPace - used for creating a space that prevents an automatic line break */}
-            <input id={id} type={type} value={searchTerm} autoFocus={isFocused} onChange={onInputChange} /> {/*autoFocus -> {true} byDefault*/} 
+            <input id={id} type={type} value={searchTerm} ref={inputRef} onChange={onInputChange} /> {/*autoFocus -> {true} byDefault*/} 
             {React.Children.forEach(children, (child, index) => {
                 console.log(child);
                 console.log(index);
@@ -248,6 +256,18 @@ const App = () => {
             <h1>{title.name} {title.introduction}:</h1>
             <h1>{title.body}, {user?.fullName}!</h1>
 
+            <InputWithLabel id="search" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
+                <strong>Search:</strong>{/* <-- children */}
+                </InputWithLabel>
+            {
+                displayLookingForTextAndResults(searchTerm)
+            }
+            <InputWithLabel id="search" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
+                <strong>Search:</strong>{/* <-- children */}
+                </InputWithLabel>
+            {
+                displayLookingForTextAndResults(searchTerm)
+            }
             <InputWithLabel id="search" searchTerm={searchTerm} isFocused onInputChange={handleSearch} >
                 <strong>Search:</strong>{/* <-- children */}
                 </InputWithLabel>
