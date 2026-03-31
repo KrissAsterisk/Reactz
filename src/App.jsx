@@ -22,6 +22,9 @@ const jsArray = [`--1`, `--2`, `--3`];
 const makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
 
+//-----------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------
 
 const PageListItem = ({ item }) => {
 
@@ -33,6 +36,11 @@ const PageListItem = ({ item }) => {
                 delistedItems.push(linkToUrl);
                 break;
             }
+            case "authors": {
+
+                delistedItems.push(<ul key={key}><li>{`${key}: ${item[key]} \n`}</li></ul>)
+                break;
+            }
             case "objectId": break;
             case "title": break;
             default: delistedItems.push(<ul key={key}><li>{`${key}: ${item[key]} \n`}</li></ul>)
@@ -41,6 +49,8 @@ const PageListItem = ({ item }) => {
 
     return <li> {delistedItems} </li>
 }
+
+//-----------------------------------------------------------------------------------------------
 
 const PageList = ({ arrayOfWebPageData }) => {
     return (
@@ -52,6 +62,8 @@ const PageList = ({ arrayOfWebPageData }) => {
         </ul>
     )
 }
+
+//-----------------------------------------------------------------------------------------------
 
 const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
     let matches = arrayOfWebPageData.filter(value => value[searchTerm] ?? null)
@@ -66,6 +78,8 @@ const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
         </ul>
     )
 }
+
+//-----------------------------------------------------------------------------------------------
 
 const InputWithLabel = ({ id, searchTerm, isFocused, type = "text", onInputChange, children }) => {
 
@@ -82,6 +96,8 @@ const InputWithLabel = ({ id, searchTerm, isFocused, type = "text", onInputChang
     )
 }
 
+//-----------------------------------------------------------------------------------------------
+
 const CreateUser = ({ onUserCreation }) => {
     const invalidInputCondition = (userInput) => {
         if (userInput == '') {
@@ -93,17 +109,15 @@ const CreateUser = ({ onUserCreation }) => {
     const normalizeInput = (userInput) => {
         return userInput?.replace(/ /g, "");
     }
-    const persistantPrompt = (promptMsg) => {
-        let userInput;
-        do {
-            userInput = normalizeInput(prompt(promptMsg));
-        } while (invalidInputCondition(userInput))
-        return userInput;
-    }
-
-
 
     React.useEffect(() => {
+        const persistantPrompt = (promptMsg) => {
+            let userInput;
+            do {
+                userInput = normalizeInput(prompt(promptMsg));
+            } while (invalidInputCondition(userInput))
+            return userInput;
+        }
         let createUser = () => {
             return new User(
                 persistantPrompt("Please enter your nickname: "),
@@ -111,13 +125,57 @@ const CreateUser = ({ onUserCreation }) => {
             );
         }
         let newUser;
-        do {
-            newUser = createUser();
-        } while (newUser.firstName == undefined || newUser.lastName == undefined)
+        do newUser = createUser();
+        while (!confirm(`nickname: ${newUser.firstName}\n` + `surname: ${newUser.lastName}\n` + `Are you sure?`) ||
+            (newUser.firstName == undefined || newUser.lastName == undefined))
         onUserCreation(newUser);
     }, [onUserCreation]);
 
     return null;
+}
+
+//-----------------------------------------------------------------------------------------------
+
+const LocalStorageReset = ({ children, useStorageState }) => {
+
+    const [toggleValue, setToggleValue] = useStorageState('boolean', 'true');
+
+    const clearStorage = () => {
+        localStorage.clear();
+        console.log("internal storage cleared.");
+        window.location.reload();
+    }
+
+    const handleClear = {
+        false() {
+            console.log("false");
+        },
+        true() {
+            clearStorage();
+        }
+    };
+    const handleButton = () => {
+        if (toggleValue === 'true') {
+            setToggleValue('false');
+        } else setToggleValue('true');
+    }
+
+    const displayButtonValue = () => {
+        return (
+            <>
+                <button onClick={handleClear[toggleValue.toString()]} > {toggleValue.toString().toUpperCase()}</button>
+            </>
+        )
+    }
+
+    return (
+        <>
+            {children}
+            &nbsp;
+            <button onClick={handleButton}>AAH</button>
+            <p1> GET THIS MAN A {displayButtonValue()} </p1>
+        </>
+    )
 }
 
 const App = () => {
@@ -126,16 +184,16 @@ const App = () => {
         {
             title: "Reactz",
             url: "localhost:9090",
-            author: "me",
+            authors: ["me", "someone_else"],
             num_comments: 3,
             points: 4,
             perfection: 100,
             objectId: 0,
         },
-        {
+        {   
             title: "AuthServer",
             url: "authserver:9000",
-            author: "admin",
+            authors: ["admin"],
             num_comments: 0,
             points: 999,
             objectId: 1,
@@ -143,7 +201,7 @@ const App = () => {
         {
             title: "AnotherAddition",
             url: "0.0.0.0:0000",
-            author: "TBD",
+            authors: ["TBD"],
             num_comments: null,
             points: null,
             objectId: 2
@@ -152,14 +210,15 @@ const App = () => {
         {
             title: "ANDANOTHER",
             url: "0.0.0.0:0000",
-            author: "TBD",
+            authors: ["TBD"],
             num_comments: null,
             points: null,
             objectId: 3
         }
     ];
 
-    //------------------HOOK------------------------
+    //------------------CUSTOM_HOOKS------------------------
+    //#1
     const useStorageState = (key, initialState) => {
         const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
 
@@ -169,8 +228,25 @@ const App = () => {
 
         return [value, setValue];
     }
-    //------------------HOOK------------------------
+    //#2
+    const useJsonStorageConversion = (key) => {
+        const [value, setValue] = React.useState(() => {
+            const stored = localStorage.getItem(key);
+            if (!stored) return null;
+            const parsed = JSON.parse(stored);
+            return new User(parsed?.firstName, parsed?.lastName);
+        });
+        React.useEffect(() => {
+            localStorage.setItem('user', JSON.stringify(value));
+        }, [value])
 
+        return [value, setValue];
+    }
+    //------------------CUSTOM_HOOKS\-----------------------------
+
+
+    //                                      SEARCH HANDLER                  
+    //--------------------------------------------------------------------------------------------------------
     const [searchTerm, setSearchTerm] = useStorageState('search', '');
 
     const handleSearch = (event) => {
@@ -189,24 +265,10 @@ const App = () => {
         }
     }
 
-    //--------------------------------------------------------------------------------------------------
+    const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
 
-    //------------------HOOK------------------------
-    const useJsonStorageConversion = (key) => { // use...()
-        const [value, setValue] = React.useState(() => { // must be declared
-            const stored = localStorage.getItem(key);
-            if (!stored) return null;
-            const parsed = JSON.parse(stored);
-            return new User(parsed?.firstName, parsed?.lastName);
-        });
-        React.useEffect(() => {
-            localStorage.setItem('user', JSON.stringify(value));
-        }, [value])
-
-        return [value, setValue]; // must be returned as array to be called a custom hook
-    }
-    //------------------HOOK------------------------
-
+    /*                                   USER HANDLER
+    --------------------------------------------------------------------------------------------------*/
     const [user, setUser] = useJsonStorageConversion('user');
 
     let handleUserCreation = (newUser) => {
@@ -218,27 +280,8 @@ const App = () => {
             return <CreateUser onUserCreation={handleUserCreation} />
         }
     }
-
-    const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
-
-    //------------------------------------------------------------------------
-
-    const [toggleValue, setToggleValue] = React.useState(() => {
-        return true
-    }, [])
-
-    const clearStorage = () => {
-        localStorage.clear();
-        console.log("internal storage cleared.")
-    }
-    const handle = {
-        false() { console.log("false") },
-        true() { clearStorage() }
-    };
-    const handleButton = () => {
-        setToggleValue(!toggleValue);
-    }
-
+    //                                   FINAL MAIN PAGE DISPLAY
+    //--------------------------------------------------------------------------------------------------
     return (
         <div>
             {
@@ -259,18 +302,14 @@ const App = () => {
 
                 }
             </h1>
-            <p1>RESET_DATA:
-                <button onClick={handleButton}>AAH</button>
-                <p1> GET THIS MAN A {<button onClick={handle[toggleValue.toString()]}>{toggleValue.toString().toUpperCase()}</button>} </p1>
-            </p1>
-            {/*i know this looks atrocious
-            but its also so cool at the same time
-            RESETS data when the button is set to true
-            */}
+            <LocalStorageReset useStorageState={useStorageState}>
+                RESET_DATA:
+            </LocalStorageReset>
             <PageList arrayOfWebPageData={soughtList} />
         </div>
 
     )
 }
+
 
 export default App
