@@ -25,21 +25,44 @@ title.defaultSound = makeNoise();
 //-----------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------
 
-const DeleteItemFromListWithButton = ({ items, setItems }) => {
+const DeleteItemFromListWithButton = ({ items, setItems, toUpdateList }) => {
 
     const handleDeleteButton = (value) => {
-        setItems(prev => prev.filter(item => item !== value));
+        setItems(prev => {
+            //for children click
+            if (value.key === null) {
+                return prev.filter(item => item !== value);
+            }
+            let skip = false;
+            //for parent click
+            return prev.filter(item => {
+                if (item.key !== null && item.key !== value.key) {
+                    skip = false;
+                }
+
+                if (item.key === value.key) {
+                    skip = true;
+                    return false;
+                }
+
+                if (skip) {
+                    return false;
+                }
+
+                return true;
+            });
+        });
     };
 
     return (
-        <>
-            {items.map((value, index) => (
-                <li key={index}>{value} <button onClick={() => handleDeleteButton(value)}>DELETE</button></li>
-            ))}
-        </>
+        
+            items.map((value) => (
+                <div key={value} style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>{value} <button onClick={() => handleDeleteButton(value)}>DELETE</button></div>
+            ))
+        
     );
 }
-const PageListItem = ({ item }) => {
+const PageListItem = ({ item, toUpdateList }) => {
 
     let delistedItems = [];
     for (let key in item) {
@@ -51,30 +74,36 @@ const PageListItem = ({ item }) => {
             }
             case "authors": {
 
-                delistedItems.push(<ul key={key}><li>{`${key}: ${item[key]} \n`}</li></ul>)
+                delistedItems.push(<div><li key={key}>{`${key}: ${item[key]} \n`}</li></div>)
                 break;
             }
             case "objectId": break;
             case "title": break;
-            default: delistedItems.push(<ul key={key}><li>{`${key}: ${item[key]} \n`}</li></ul>)
+            default: delistedItems.push(<div><li key={key}>{`${key}: ${item[key]} \n`}</li></div>)
         }
     }
     const [items, setItems] = React.useState(delistedItems);
 
+    const handleDeleteItems = (newItems) => {
+        setItems(newItems);
+    }
 
-    return <DeleteItemFromListWithButton items={items} setItems={setItems} />
+
+    return <DeleteItemFromListWithButton items={items} setItems={handleDeleteItems} toUpdateList={toUpdateList} />
+
 }
 
 //-----------------------------------------------------------------------------------------------
 
-const PageList = ({ arrayOfWebPageData }) => {
+const PageList = ({ arrayOfWebPageData, toUpdateList }) => {
     return (
-        <ul>
-            {
-                arrayOfWebPageData.map((item) => <PageListItem key={item.objectId} item={item} />)
-
-            }
-        </ul>
+        <>
+            <ul>
+                {
+                    arrayOfWebPageData.map((item) => <PageListItem key={item.objectId} item={item} toUpdateList={toUpdateList} />)
+                }
+            </ul>
+        </>
     )
 }
 
@@ -195,7 +224,7 @@ const LocalStorageReset = ({ children, useStorageState }) => {
 
 const App = () => {
     console.log(makeNoise());
-    const arrayOfWebPageData = [
+    const initialArrayOfWebPageData = [
         {
             title: "Reactz",
             url: "localhost:9090",
@@ -231,6 +260,12 @@ const App = () => {
             objectId: 3
         }
     ];
+
+    const [arrayOfWebPageData, setArrayOfWebPageData] = React.useState(initialArrayOfWebPageData);
+
+    const updateWebData = (newData) => {
+        setArrayOfWebPageData(newData);
+    }
 
     //------------------CUSTOM_HOOKS------------------------
     //#1
@@ -322,7 +357,7 @@ const App = () => {
             <LocalStorageReset useStorageState={useStorageState}>
                 RESET_DATA:
             </LocalStorageReset>
-            <PageList arrayOfWebPageData={soughtList} />
+            <PageList arrayOfWebPageData={soughtList} toUpdateList={updateWebData} />
         </div>
 
     )
