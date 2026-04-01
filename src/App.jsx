@@ -39,14 +39,6 @@ const DeleteItemFromListWithButton = ({ items, setItems }) => {
         </>
     );
 }
-
-class Thing {
-    constructor(array) {
-        this.array = array;
-        console.log(this.array);
-    }
-
-}
 const PageListItem = ({ item }) => {
 
     let delistedItems = [];
@@ -203,33 +195,6 @@ const LocalStorageReset = ({ children, useStorageState }) => {
 
 const App = () => {
     console.log(makeNoise());
-    //------------------CUSTOM_HOOKS------------------------
-    //#1
-    const useStorageState = (key, initialState) => {
-        const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
-
-        React.useEffect(() => {
-            localStorage.setItem(key, value);
-        }, [value, key])
-
-        return [value, setValue];
-    }
-    //#2
-    const useJsonStorageConversion = (key, initialState = null) => {
-
-        const [value, setValue] = React.useState(() => {
-            const stored = localStorage.getItem(key);
-            if (!stored) return initialState;
-            const parsed = JSON.parse(stored);
-            return typeof (parsed) == 'object' ? new User(parsed.firstName, parsed.lastName) : null;
-        });
-        React.useEffect(() => {
-            localStorage.setItem(key, JSON.stringify(value));
-        }, [value, key])
-
-        return [value, setValue];
-    }
-    //------------------CUSTOM_HOOKS\-----------------------------
     const arrayOfWebPageData = [
         {
             title: "Reactz",
@@ -266,6 +231,36 @@ const App = () => {
             objectId: 3
         }
     ];
+
+    //------------------CUSTOM_HOOKS------------------------
+    //#1
+    const useStorageState = (key, initialState) => {
+        const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
+
+        React.useEffect(() => {
+            localStorage.setItem(key, value);
+        }, [value, key])
+
+        return [value, setValue];
+    }
+    //#2
+    const useJsonStorageConversion = (key, initialState = null) => {
+
+        const [value, setValue] = React.useState(() => {
+            const stored = localStorage.getItem(key);
+            if (!stored) return initialState;
+            const parsed = JSON.parse(stored);
+            return typeof (parsed) == 'object' ? new User(parsed.firstName, parsed.lastName) : null;
+        });
+        React.useEffect(() => {
+            localStorage.setItem(key, JSON.stringify(value));
+        }, [value, key])
+
+        return [value, setValue];
+    }
+    //------------------CUSTOM_HOOKS\-----------------------------
+
+
 
     //                                      SEARCH HANDLER                  
     //--------------------------------------------------------------------------------------------------------
