@@ -17,7 +17,6 @@ class User {
     }
 }
 
-
 const jsArray = [`--1`, `--2`, `--3`];
 const makeNoise = () => "AAAAAAAAAAAAAAAAH";
 title.defaultSound = makeNoise();
@@ -26,6 +25,28 @@ title.defaultSound = makeNoise();
 //-----------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------
 
+const DeleteItemFromListWithButton = ({ items, setItems }) => {
+
+    const handleDeleteButton = (value) => {
+        setItems(prev => prev.filter(item => item !== value));
+    };
+
+    return (
+        <>
+            {items.map((value, index) => (
+                <li key={index}>{value} <button onClick={() => handleDeleteButton(value)}>DELETE</button></li>
+            ))}
+        </>
+    );
+}
+
+class Thing {
+    constructor(array) {
+        this.array = array;
+        console.log(this.array);
+    }
+
+}
 const PageListItem = ({ item }) => {
 
     let delistedItems = [];
@@ -46,8 +67,10 @@ const PageListItem = ({ item }) => {
             default: delistedItems.push(<ul key={key}><li>{`${key}: ${item[key]} \n`}</li></ul>)
         }
     }
+    const [items, setItems] = React.useState(delistedItems);
 
-    return <li> {delistedItems} </li>
+
+    return <DeleteItemFromListWithButton items={items} setItems={setItems} />
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -89,8 +112,8 @@ const InputWithLabel = ({ id, searchTerm, isFocused, type = "text", onInputChang
             &nbsp; {/* Non Breaking SPace - used for creating a space that prevents an automatic line break */}
             <input id={id} type={type} value={searchTerm} autoFocus={isFocused} onChange={onInputChange} /> {/*autoFocus -> {true} byDefault*/}
             {React.Children.forEach(children, (child, index) => {
-                console.log(child);
-                console.log(index);
+                //console.log(child);
+                // console.log(index);
             })}
         </React.Fragment>
     )
@@ -180,6 +203,33 @@ const LocalStorageReset = ({ children, useStorageState }) => {
 
 const App = () => {
     console.log(makeNoise());
+    //------------------CUSTOM_HOOKS------------------------
+    //#1
+    const useStorageState = (key, initialState) => {
+        const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
+
+        React.useEffect(() => {
+            localStorage.setItem(key, value);
+        }, [value, key])
+
+        return [value, setValue];
+    }
+    //#2
+    const useJsonStorageConversion = (key, initialState = null) => {
+
+        const [value, setValue] = React.useState(() => {
+            const stored = localStorage.getItem(key);
+            if (!stored) return initialState;
+            const parsed = JSON.parse(stored);
+            return typeof (parsed) == 'object' ? new User(parsed.firstName, parsed.lastName) : null;
+        });
+        React.useEffect(() => {
+            localStorage.setItem(key, JSON.stringify(value));
+        }, [value, key])
+
+        return [value, setValue];
+    }
+    //------------------CUSTOM_HOOKS\-----------------------------
     const arrayOfWebPageData = [
         {
             title: "Reactz",
@@ -190,7 +240,7 @@ const App = () => {
             perfection: 100,
             objectId: 0,
         },
-        {   
+        {
             title: "AuthServer",
             url: "authserver:9000",
             authors: ["admin"],
@@ -216,34 +266,6 @@ const App = () => {
             objectId: 3
         }
     ];
-
-    //------------------CUSTOM_HOOKS------------------------
-    //#1
-    const useStorageState = (key, initialState) => {
-        const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
-
-        React.useEffect(() => {
-            localStorage.setItem(key, value);
-        }, [value, key])
-
-        return [value, setValue];
-    }
-    //#2
-    const useJsonStorageConversion = (key) => {
-        const [value, setValue] = React.useState(() => {
-            const stored = localStorage.getItem(key);
-            if (!stored) return null;
-            const parsed = JSON.parse(stored);
-            return new User(parsed?.firstName, parsed?.lastName);
-        });
-        React.useEffect(() => {
-            localStorage.setItem('user', JSON.stringify(value));
-        }, [value])
-
-        return [value, setValue];
-    }
-    //------------------CUSTOM_HOOKS\-----------------------------
-
 
     //                                      SEARCH HANDLER                  
     //--------------------------------------------------------------------------------------------------------
