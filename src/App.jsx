@@ -229,6 +229,9 @@ const webDataReducer = (state, action) => {
         default: throw new Error();
     }
 }
+
+const API_ENDPOINT = 'http://localhost:27015/api/reactData';
+
 const App = () => {
     console.log(makeNoise());
 
@@ -306,17 +309,21 @@ const App = () => {
     }
 
     React.useEffect(() => {
-        getAsyncData().then(dispatchWebData({ type: 'WEB_DATA_FETCH_INIT' })).then(result => {
-            dispatchWebData({
-                type: 'WEB_DATA_FETCH_SUCCESS',
-                payload: result.data.arrayOfWebPageData
-            })
-        }).catch(() => dispatchWebData({
-            type: 'WEB_DATA_FETCH_FAILURE'
-        }))
-    }, []);
-
-
+        // dispatchWebData({ type: 'WEB_DATA_FETCH_INIT' });
+        fetch(`${API_ENDPOINT}`)
+            .then((response) => response.json())
+            .then(response => console.log(response[0].data))
+        //.then(result => {
+        //    dispatchWebData({
+        //        type: 'WEB_DATA_FETCH_SUCCESS',
+        //        payload: result.hits
+        //    })
+        //}).catch(() => {
+        //    dispatchWebData({
+        //        type: "WEB_DATA_FETCH_FAILURE"
+        //    })
+        //})
+    })
 
 
     //------------------CUSTOM_HOOKS------------------------
