@@ -28,14 +28,16 @@ title.defaultSound = makeNoise();
 const DeleteItemFromListWithButton = ({ delistedItems, handleWebData, setDelistedItems }) => {
 
     const handleDeleteButton = (valueToDelete) => {
-        handleWebData(valueToDelete, setDelistedItems,);
+        handleWebData(valueToDelete, setDelistedItems);
     };
 
     return (
 
-        delistedItems.map((value) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>{value}<button onClick={() => handleDeleteButton(value)}>DELETE</button></div>
-        ))
+        delistedItems.map((value) => {
+            console.log(value.props.children.type == null);
+            if (value.props.children.type == null) return <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}> {value} < button onClick={() => handleDeleteButton(value)}> DELETE</button ></div >
+            else return <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}> {value}</div >
+        })
 
     );
 }
@@ -196,11 +198,33 @@ const LocalStorageReset = ({ children, useStorageState }) => {
 
 const webDataReducer = (state, action) => {
     switch (action.type) {
-        case 'SET_WEB_DATA': {
-            return action.payload;
+        case 'WEB_DATA_FETCH_INIT': {
+            return {
+                ...state,
+                isDataWaiting: true,
+                isDataError: false,
+            }
+        }
+        case 'WEB_DATA_FETCH_SUCCESS': {
+            return {
+                ...state,
+                isDataWaiting: false,
+                isDataError: false,
+                data: action.payload
+            };
+        }
+        case 'WEB_DATA_FETCH_FAILURE': {
+            return {
+                ...state,
+                isDataWaiting: false,
+                isDataError: true,
+            }
         }
         case 'DELETE_WEB_DATA': {
-            return state.filter(item => String(item.objectId) !== String(action.payload.key))
+            return {
+                ...state,
+                data: state.data.filter(item => String(item.objectId) !== String(action.payload))
+            };
         }
         default: throw new Error();
     }
@@ -248,21 +272,15 @@ const App = () => {
 
 
 
-    const [arrayOfWebPageData, dispatchWebData] = React.useReducer(webDataReducer, []);
+    const [arrayOfWebPageData, dispatchWebData] = React.useReducer(webDataReducer, { data: [], isDataWaiting: false, isDataError: false });
 
     const handleWebData = (valueToDelete, setDelistedItems) => {
         setDelistedItems(prev => prev.filter(item => item !== valueToDelete));
+        dispatchWebData({
+            type: 'DELETE_WEB_DATA',
+            payload: valueToDelete.key
+        });
 
-
-
-        if (String(valueToDelete.key) === String(valueToDelete.key * 1)) {
-            //const newWebData = arrayOfWebPageData.filter(item => String(item.objectId) !== String(valueToDelete.key));
-            // it's a number-like key = objectId = title row, remove whole entry
-            dispatchWebData({
-                type: 'DELETE_WEB_DATA',
-                payload: valueToDelete.key
-            });
-        }
     }
 
 
@@ -277,14 +295,6 @@ const App = () => {
 
     }
 
-
-
-
-    const [isDataWaiting, setIsDataWaiting] = React.useState(false);
-    const [isDataError, setIsDataError] = React.useState(false);
-
-
-
     const waiting = (isDataWaiting) => {
         if (isDataWaiting) {
             return (
@@ -296,12 +306,14 @@ const App = () => {
     }
 
     React.useEffect(() => {
-        getAsyncData().then(setIsDataWaiting(true)).then(result => {
+        getAsyncData().then(dispatchWebData({ type: 'WEB_DATA_FETCH_INIT' })).then(result => {
             dispatchWebData({
-                type: 'SET_WEB_DATA',
+                type: 'WEB_DATA_FETCH_SUCCESS',
                 payload: result.data.arrayOfWebPageData
             })
-        }).catch(() => setIsDataError(true));
+        }).catch(() => dispatchWebData({
+            type: 'WEB_DATA_FETCH_FAILURE'
+        }))
     }, []);
 
 
@@ -359,16 +371,15 @@ const App = () => {
     const soughtList = React.useMemo(() => {
         if (searchTerm.includes(':')) {
             const [titlePart, fieldPart] = searchTerm.split(':').map(s => s.trim());
-            return arrayOfWebPageData
-                .filter(value => value.title.toLowerCase().includes(titlePart));
+            return arrayOfWebPageData.data.filter(value => value.title.toLowerCase().includes(titlePart));
         }
-        return arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
+        return arrayOfWebPageData.data.filter(value => value.title.toLowerCase().includes(searchTerm));
     }, [arrayOfWebPageData, searchTerm]);
 
     const validateList = React.useMemo(() => {
         if (!searchTerm.includes(':')) return [];
         const [titlePart, fieldPart] = searchTerm.split(':').map(s => s.trim());
-        return arrayOfWebPageData
+        return arrayOfWebPageData.data
             .filter(value => value.title.toLowerCase().includes(titlePart))
             .map(value => ({ ...value, _displayField: fieldPart }));
     }, [arrayOfWebPageData, searchTerm]);
@@ -416,10 +427,10 @@ const App = () => {
                 RESET_DATA:
             </LocalStorageReset>
             {
-                isDataError && <p>Something went wrong!</p>
+                arrayOfWebPageData.isDataError && <p>Something went wrong!</p>
             }
             {
-                waiting(isDataWaiting)
+                waiting(arrayOfWebPageData.isDataWaiting)
             }
             <PageList arrayOfWebPageData={soughtList} handleWebData={handleWebData} />
         </div>
