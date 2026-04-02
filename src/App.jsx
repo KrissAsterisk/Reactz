@@ -249,6 +249,7 @@ const App = () => {
     }
 
     const [isDataWaiting, setIsDataWaiting] = React.useState(false);
+    const [isDataError, setIsDataError] = React.useState(false);
 
 
     
@@ -266,7 +267,7 @@ const App = () => {
         getAsyncData().then(setIsDataWaiting(true)).then(result => {
             setIsDataWaiting(false);
             setArrayOfWebPageData(result.data.arrayOfWebPageData);
-        });
+        }).catch(() => setIsDataError(true));
     }, []);
 
     const handleWebData = (valueToDelete, setDelistedItems) => {
@@ -397,6 +398,9 @@ const App = () => {
             <LocalStorageReset useStorageState={useStorageState}>
                 RESET_DATA:
             </LocalStorageReset>
+            {
+                isDataError && <p>Something went wrong!</p>
+            }
             {
                 waiting(isDataWaiting)
             }
