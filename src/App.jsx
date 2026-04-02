@@ -25,101 +25,73 @@ title.defaultSound = makeNoise();
 //-----------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------
 
-const DeleteItemFromListWithButton = ({ items, handleDeleteItems }) => {
+const DeleteItemFromListWithButton = ({ delistedItems, handleWebData, setDelistedItems }) => {
 
-    const handleDeleteButton = (value) => {
-        handleDeleteItems(prev => {
-            //for children click
-            if (value.key === null) {
-                return prev.filter(item => item !== value);
-            }
-            let skip = false;
-            //for parent click
-            return prev.filter(item => {
-                if (item.key !== null && item.key !== value.key) {
-                    skip = false;
-                }
-
-                if (item.key === value.key) {
-                    skip = true;
-                    return false;
-                }
-
-                if (skip) {
-                    return false;
-                }
-
-                return true;
-            });
-        });
+    const handleDeleteButton = (valueToDelete) => {
+        handleWebData(valueToDelete, setDelistedItems, );
     };
 
     return (
-        
-            items.map((value) => (
-                <div key={value} style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>{value} <button onClick={() => handleDeleteButton(value)}>DELETE</button></div>
-            ))
-        
+
+        delistedItems.map((value) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>{value}<button onClick={() => handleDeleteButton(value)}>DELETE</button></div>
+        ))
+
     );
 }
-const PageListItem = ({ item }) => {
+const PageListItem = ({ itemOfWebPageData, handleWebData }) => {
 
-    let delistedItems = [];
-    for (let key in item) {
-        switch (key) {
-            case "url": {
-                var linkToUrl = <a key={item.objectId} href={`http://${item[key]}`}>{item.title || null}:</a>;
-                delistedItems.push(linkToUrl);
-                break;
-            }
-            case "authors": {
+    const [delistedItems, setDelistedItems] = React.useState([]);
+    React.useEffect(() => {
+        let formattedWebData = [];
+        for (let key in itemOfWebPageData) {
+            switch (key) {
+                case "url": {
+                    var titleToUrl = <a key={itemOfWebPageData.objectId} href={`http://${itemOfWebPageData[key]}`}>{itemOfWebPageData.title}:</a>;
+                    formattedWebData.push(titleToUrl);
+                    break;
+                }
+                case "authors": {
 
-                delistedItems.push(<div><li key={key}>{`${key}: ${item[key]} \n`}</li></div>)
-                break;
+                    formattedWebData.push(<div><li key={key}>{`${key}: ${itemOfWebPageData[key]} \n`}</li></div>)
+                    break;
+                }
+                case "objectId": break;
+                case "title": break;
+                default: formattedWebData.push(<div><li key={key}>{`${key}: ${itemOfWebPageData[key]} \n`}</li></div>)
             }
-            case "objectId": break;
-            case "title": break;
-            default: delistedItems.push(<div><li key={key}>{`${key}: ${item[key]} \n`}</li></div>)
+
         }
-    }
-    const [items, setItems] = React.useState(delistedItems);
+        setDelistedItems(formattedWebData);
+    }, [])
 
-    const handleDeleteItems = (newItems) => {
-        setItems(newItems);
-    }
-
-
-    return <DeleteItemFromListWithButton items={items} handleDeleteItems={handleDeleteItems} />
+    return <DeleteItemFromListWithButton delistedItems={delistedItems} handleWebData={handleWebData} setDelistedItems={setDelistedItems} />
 
 }
 
 //-----------------------------------------------------------------------------------------------
 
-const PageList = ({ arrayOfWebPageData }) => {
+const PageList = ({ arrayOfWebPageData, handleWebData }) => {
     return (
         <>
-            <ul>
-                {
-                    arrayOfWebPageData.map((item) => <PageListItem key={item.objectId} item={item}/>)
-                }
-            </ul>
+            {
+                arrayOfWebPageData.map((itemOfWebPageData) => <PageListItem key={itemOfWebPageData.objectId} itemOfWebPageData={itemOfWebPageData} handleWebData={handleWebData} />)
+            }
         </>
     )
 }
 
 //-----------------------------------------------------------------------------------------------
 
-const ValidateSearch = ({ searchTerm, arrayOfWebPageData }) => {
-    let matches = arrayOfWebPageData.filter(value => value[searchTerm] ?? null)
-
-    let displayMatches = (matches) => matches.map((value, index) => <li key={index}>{value[searchTerm]}</li>)
-
+const ValidateSearch = ({ soughtList }) => {
     return (
-        <ul>
-            {
-                displayMatches(matches)
-            }
-        </ul>
+        <>
+            {soughtList.map((item, index) => (
+                <li key={index}>
+                    {`${item.title} - ${item._displayField}: ${item[item._displayField]}`}
+                </li>
+            ))}
+        </>
     )
 }
 
@@ -224,6 +196,8 @@ const LocalStorageReset = ({ children, useStorageState }) => {
 
 const App = () => {
     console.log(makeNoise());
+
+    //----------------------------------STATIC_LOCAL_DATA--------------------------------------
     const initialArrayOfWebPageData = [
         {
             title: "Reactz",
@@ -261,11 +235,44 @@ const App = () => {
         }
     ];
 
-    const [arrayOfWebPageData, setArrayOfWebPageData] = React.useState(initialArrayOfWebPageData);
+    const [arrayOfWebPageData, setArrayOfWebPageData] = React.useState([]);
 
-    const updateWebData = (newData) => {
-        setArrayOfWebPageData(newData);
+    //----------------------------------ASYNC_PROMISE-----------------------------------------
+    const getAsyncData = () => {
+        return new Promise((resolve =>
+            setTimeout(
+                () => resolve({ data: { arrayOfWebPageData: initialArrayOfWebPageData } }),
+                1000
+            )
+        ));
     }
+
+
+    React.useEffect(() => {
+        getAsyncData().then(result => {
+            setArrayOfWebPageData(result.data.arrayOfWebPageData);
+        });
+    }, []);
+
+const handleWebData = (valueToDelete, setDelistedItems) => {
+    setDelistedItems(prev => prev.filter(item => item !== valueToDelete));
+
+    if (String(valueToDelete.key) === String(valueToDelete.key * 1)) {
+        // it's a number-like key = objectId = title row, remove whole entry
+        setArrayOfWebPageData(prev =>
+            prev.filter(item => String(item.objectId) !== String(valueToDelete.key))
+        );
+    } else {
+        // it's a field key like "authors", "num_comments" etc, remove that field from the item
+        setArrayOfWebPageData(prev =>
+            prev.map(item => {
+                const updated = { ...item };
+                delete updated[valueToDelete.key];
+                return updated;
+            })
+        );
+    }
+}
 
     //------------------CUSTOM_HOOKS------------------------
     //#1
@@ -306,18 +313,32 @@ const App = () => {
     }
 
     let displayLookingForTextAndResults = (searchTerm) => {
-        if (searchTerm ?? null) {
+        if (searchTerm.includes(':')) {
             return (
-
-                <> {/*<React.Fragment>*/}
+                <>
                     <p>Looking for: {searchTerm}</p>
-                    <ValidateSearch searchTerm={searchTerm} arrayOfWebPageData={arrayOfWebPageData} />
-                </> /*</React.Fragment>*/
+                    <ValidateSearch soughtList={validateList} />
+                </>
             )
         }
     }
 
-    const soughtList = arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
+    const soughtList = React.useMemo(() => {
+        if (searchTerm.includes(':')) {
+            const [titlePart, fieldPart] = searchTerm.split(':').map(s => s.trim());
+            return arrayOfWebPageData
+                .filter(value => value.title.toLowerCase().includes(titlePart));
+        }
+        return arrayOfWebPageData.filter(value => value.title.toLowerCase().includes(searchTerm));
+    }, [arrayOfWebPageData, searchTerm]);
+
+    const validateList = React.useMemo(() => {
+        if (!searchTerm.includes(':')) return [];
+        const [titlePart, fieldPart] = searchTerm.split(':').map(s => s.trim());
+        return arrayOfWebPageData
+            .filter(value => value.title.toLowerCase().includes(titlePart))
+            .map(value => ({ ...value, _displayField: fieldPart }));
+    }, [arrayOfWebPageData, searchTerm]);
 
     /*                                   USER HANDLER
     --------------------------------------------------------------------------------------------------*/
@@ -360,7 +381,7 @@ const App = () => {
             <LocalStorageReset useStorageState={useStorageState}>
                 RESET_DATA:
             </LocalStorageReset>
-            <PageList arrayOfWebPageData={soughtList} />
+            <PageList arrayOfWebPageData={soughtList} handleWebData={handleWebData} />
         </div>
 
     )
