@@ -28,7 +28,7 @@ title.defaultSound = makeNoise();
 const DeleteItemFromListWithButton = ({ delistedItems, handleWebData, setDelistedItems }) => {
 
     const handleDeleteButton = (valueToDelete) => {
-        handleWebData(valueToDelete, setDelistedItems, );
+        handleWebData(valueToDelete, setDelistedItems,);
     };
 
     return (
@@ -240,39 +240,54 @@ const App = () => {
     //----------------------------------ASYNC_PROMISE-----------------------------------------
     const getAsyncData = () => {
         return new Promise((resolve =>
-            setTimeout(
-                () => resolve({ data: { arrayOfWebPageData: initialArrayOfWebPageData } }),
-                1000
-            )
-        ));
+                setTimeout(
+                    () => resolve({ data: { arrayOfWebPageData: initialArrayOfWebPageData } }),
+                    1000
+            ))
+        );
+
     }
 
+    const [isDataWaiting, setIsDataWaiting] = React.useState(false);
+
+
+    
+    const waiting = (isDataWaiting) => {
+        if (isDataWaiting) {
+            return (
+                <>
+                    <p>Loading...</p>
+                </>
+            )
+        }
+    }
 
     React.useEffect(() => {
-        getAsyncData().then(result => {
+        getAsyncData().then(setIsDataWaiting(true)).then(result => {
+            setIsDataWaiting(false);
             setArrayOfWebPageData(result.data.arrayOfWebPageData);
         });
     }, []);
 
-const handleWebData = (valueToDelete, setDelistedItems) => {
-    setDelistedItems(prev => prev.filter(item => item !== valueToDelete));
+    const handleWebData = (valueToDelete, setDelistedItems) => {
+        setDelistedItems(prev => prev.filter(item => item !== valueToDelete));
 
-    if (String(valueToDelete.key) === String(valueToDelete.key * 1)) {
-        // it's a number-like key = objectId = title row, remove whole entry
-        setArrayOfWebPageData(prev =>
-            prev.filter(item => String(item.objectId) !== String(valueToDelete.key))
-        );
-    } else {
-        // it's a field key like "authors", "num_comments" etc, remove that field from the item
-        setArrayOfWebPageData(prev =>
-            prev.map(item => {
-                const updated = { ...item };
-                delete updated[valueToDelete.key];
-                return updated;
-            })
-        );
+        if (String(valueToDelete.key) === String(valueToDelete.key * 1)) {
+            // it's a number-like key = objectId = title row, remove whole entry
+            setArrayOfWebPageData(prev =>
+                prev.filter(item => String(item.objectId) !== String(valueToDelete.key))
+            );
+        } else {
+            // it's a field key like "authors", "num_comments" etc, remove that field from the item
+            setArrayOfWebPageData(prev =>
+                prev.map(item => {
+                    const updated = { ...item };
+                    delete updated[valueToDelete.key];
+                    return updated;
+                })
+            );
+        }
     }
-}
 
     //------------------CUSTOM_HOOKS------------------------
     //#1
@@ -378,9 +393,13 @@ const handleWebData = (valueToDelete, setDelistedItems) => {
                 }
                 --
             </h1>
+
             <LocalStorageReset useStorageState={useStorageState}>
                 RESET_DATA:
             </LocalStorageReset>
+            {
+                waiting(isDataWaiting)
+            }
             <PageList arrayOfWebPageData={soughtList} handleWebData={handleWebData} />
         </div>
 
