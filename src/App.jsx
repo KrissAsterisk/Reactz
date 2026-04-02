@@ -25,10 +25,10 @@ title.defaultSound = makeNoise();
 //-----------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------
 
-const DeleteItemFromListWithButton = ({ items, setItems, toUpdateList }) => {
+const DeleteItemFromListWithButton = ({ items, handleDeleteItems }) => {
 
     const handleDeleteButton = (value) => {
-        setItems(prev => {
+        handleDeleteItems(prev => {
             //for children click
             if (value.key === null) {
                 return prev.filter(item => item !== value);
@@ -62,7 +62,7 @@ const DeleteItemFromListWithButton = ({ items, setItems, toUpdateList }) => {
         
     );
 }
-const PageListItem = ({ item, toUpdateList }) => {
+const PageListItem = ({ item }) => {
 
     let delistedItems = [];
     for (let key in item) {
@@ -89,18 +89,18 @@ const PageListItem = ({ item, toUpdateList }) => {
     }
 
 
-    return <DeleteItemFromListWithButton items={items} setItems={handleDeleteItems} toUpdateList={toUpdateList} />
+    return <DeleteItemFromListWithButton items={items} handleDeleteItems={handleDeleteItems} />
 
 }
 
 //-----------------------------------------------------------------------------------------------
 
-const PageList = ({ arrayOfWebPageData, toUpdateList }) => {
+const PageList = ({ arrayOfWebPageData }) => {
     return (
         <>
             <ul>
                 {
-                    arrayOfWebPageData.map((item) => <PageListItem key={item.objectId} item={item} toUpdateList={toUpdateList} />)
+                    arrayOfWebPageData.map((item) => <PageListItem key={item.objectId} item={item}/>)
                 }
             </ul>
         </>
@@ -351,13 +351,16 @@ const App = () => {
             <h1>
                 {
                     jsArray.map((item) => item.replace(item.charAt(item.length - 1), "X"))
-
                 }
+                {
+                    jsArray.map((item) => item.replace(item.charAt(item.length - 1), "X"))
+                }
+                --
             </h1>
             <LocalStorageReset useStorageState={useStorageState}>
                 RESET_DATA:
             </LocalStorageReset>
-            <PageList arrayOfWebPageData={soughtList} toUpdateList={updateWebData} />
+            <PageList arrayOfWebPageData={soughtList} />
         </div>
 
     )
