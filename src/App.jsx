@@ -194,6 +194,17 @@ const LocalStorageReset = ({ children, useStorageState }) => {
     )
 }
 
+const webDataReducer = (state, action) => {
+    switch (action.type) {
+        case 'SET_WEB_DATA': {
+            return action.payload;
+        }
+        case 'DELETE_WEB_DATA': {
+            return state.filter(item => String(item.objectId) !== String(action.payload.key))
+        }
+        default: throw new Error();
+    }
+}
 const App = () => {
     console.log(makeNoise());
 
@@ -235,24 +246,45 @@ const App = () => {
         }
     ];
 
-    const [arrayOfWebPageData, setArrayOfWebPageData] = React.useState([]);
+
+
+    const [arrayOfWebPageData, dispatchWebData] = React.useReducer(webDataReducer, []);
+
+    const handleWebData = (valueToDelete, setDelistedItems) => {
+        setDelistedItems(prev => prev.filter(item => item !== valueToDelete));
+
+
+
+        if (String(valueToDelete.key) === String(valueToDelete.key * 1)) {
+            //const newWebData = arrayOfWebPageData.filter(item => String(item.objectId) !== String(valueToDelete.key));
+            // it's a number-like key = objectId = title row, remove whole entry
+            dispatchWebData({
+                type: 'DELETE_WEB_DATA',
+                payload: valueToDelete.key
+            });
+        }
+    }
+
 
     //----------------------------------ASYNC_PROMISE-----------------------------------------
     const getAsyncData = () => {
         return new Promise((resolve =>
-                setTimeout(
-                    () => resolve({ data: { arrayOfWebPageData: initialArrayOfWebPageData } }),
-                    1000
+            setTimeout(
+                () => resolve({ data: { arrayOfWebPageData: initialArrayOfWebPageData } }),
+                1000
             ))
         );
 
     }
 
+
+
+
     const [isDataWaiting, setIsDataWaiting] = React.useState(false);
     const [isDataError, setIsDataError] = React.useState(false);
 
 
-    
+
     const waiting = (isDataWaiting) => {
         if (isDataWaiting) {
             return (
@@ -265,30 +297,15 @@ const App = () => {
 
     React.useEffect(() => {
         getAsyncData().then(setIsDataWaiting(true)).then(result => {
-            setIsDataWaiting(false);
-            setArrayOfWebPageData(result.data.arrayOfWebPageData);
+            dispatchWebData({
+                type: 'SET_WEB_DATA',
+                payload: result.data.arrayOfWebPageData
+            })
         }).catch(() => setIsDataError(true));
     }, []);
 
-    const handleWebData = (valueToDelete, setDelistedItems) => {
-        setDelistedItems(prev => prev.filter(item => item !== valueToDelete));
 
-        if (String(valueToDelete.key) === String(valueToDelete.key * 1)) {
-            // it's a number-like key = objectId = title row, remove whole entry
-            setArrayOfWebPageData(prev =>
-                prev.filter(item => String(item.objectId) !== String(valueToDelete.key))
-            );
-        } else {
-            // it's a field key like "authors", "num_comments" etc, remove that field from the item
-            setArrayOfWebPageData(prev =>
-                prev.map(item => {
-                    const updated = { ...item };
-                    delete updated[valueToDelete.key];
-                    return updated;
-                })
-            );
-        }
-    }
+
 
     //------------------CUSTOM_HOOKS------------------------
     //#1
