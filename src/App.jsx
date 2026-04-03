@@ -77,11 +77,12 @@ const PageList = ({ arrayOfWebPageData, handleWebData }) => {
     return (
         <>
             {
-                arrayOfWebPageData.map((itemOfWebPageData) => <PageListItem key={itemOfWebPageData.objectId} itemOfWebPageData={itemOfWebPageData} handleWebData={handleWebData} />)
+                arrayOfWebPageData?.map?.((itemOfWebPageData) => <PageListItem key={itemOfWebPageData.objectId} itemOfWebPageData={itemOfWebPageData} handleWebData={handleWebData} />)
             }
         </>
     )
 }
+
 
 //-----------------------------------------------------------------------------------------------
 
@@ -277,6 +278,8 @@ const App = () => {
 
     const [arrayOfWebPageData, dispatchWebData] = React.useReducer(webDataReducer, { data: [], isDataWaiting: false, isDataError: false });
 
+    const [oneSpringData, dispatchOneSpringData] = React.useReducer();
+
     const handleWebData = (valueToDelete, setDelistedItems) => {
         setDelistedItems(prev => prev.filter(item => item !== valueToDelete));
         dispatchWebData({
@@ -289,11 +292,11 @@ const App = () => {
 
     //----------------------------------ASYNC_PROMISE-----------------------------------------
     const getAsyncData = () => {
-        return new Promise((resolve =>
+        return new Promise((resolve) =>
             setTimeout(
                 () => resolve({ data: { arrayOfWebPageData: initialArrayOfWebPageData } }),
                 1000
-            ))
+            )
         );
 
     }
@@ -309,21 +312,39 @@ const App = () => {
     }
 
     React.useEffect(() => {
-        // dispatchWebData({ type: 'WEB_DATA_FETCH_INIT' });
+        dispatchWebData({ type: 'WEB_DATA_FETCH_INIT' })
         fetch(`${API_ENDPOINT}`)
             .then((response) => response.json())
-            .then(response => console.log(response[0].data))
-        //.then(result => {
-        //    dispatchWebData({
-        //        type: 'WEB_DATA_FETCH_SUCCESS',
-        //        payload: result.hits
-        //    })
-        //}).catch(() => {
-        //    dispatchWebData({
-        //        type: "WEB_DATA_FETCH_FAILURE"
-        //    })
-        //})
-    })
+            .then(result => {
+                dispatchWebData({
+                    type: 'WEB_DATA_FETCH_SUCCESS',
+                    payload: result[0].data
+                })
+            }).catch((err) => {
+                console.log(err);
+                dispatchWebData({
+                    type: "WEB_DATA_FETCH_FAILURE"
+
+                })
+                setTimeout(1000)
+                dispatchWebData({ type: 'WEB_DATA_FETCH_INIT' });
+                getAsyncData()
+                    .then(result => {
+                        dispatchWebData({
+                            type: 'WEB_DATA_FETCH_SUCCESS',
+                            payload: result.data.arrayOfWebPageData
+                        })
+
+                    }).catch((err) => {
+                        console.log(err);
+                        dispatchWebData({
+                            type: 'WEB_DATA_FETCH_FAILURE'
+                        })
+
+                    })
+            })
+
+    }, [])
 
 
     //------------------CUSTOM_HOOKS------------------------
@@ -378,17 +399,15 @@ const App = () => {
     const soughtList = React.useMemo(() => {
         if (searchTerm.includes(':')) {
             const [titlePart, fieldPart] = searchTerm.split(':').map(s => s.trim());
-            return arrayOfWebPageData.data.filter(value => value.title.toLowerCase().includes(titlePart));
+            return arrayOfWebPageData.data.filter?.(value => value.title?.toLowerCase().includes(titlePart));
         }
-        return arrayOfWebPageData.data.filter(value => value.title.toLowerCase().includes(searchTerm));
+        return arrayOfWebPageData.data.filter?.(value => value.title?.toLowerCase().includes(searchTerm));
     }, [arrayOfWebPageData, searchTerm]);
 
     const validateList = React.useMemo(() => {
         if (!searchTerm.includes(':')) return [];
         const [titlePart, fieldPart] = searchTerm.split(':').map(s => s.trim());
-        return arrayOfWebPageData.data
-            .filter(value => value.title.toLowerCase().includes(titlePart))
-            .map(value => ({ ...value, _displayField: fieldPart }));
+        return arrayOfWebPageData.data.filter?.(value => value.title?.toLowerCase().includes(titlePart))?.map(value => ({ ...value, _displayField: fieldPart }));
     }, [arrayOfWebPageData, searchTerm]);
 
     /*                                   USER HANDLER
@@ -406,6 +425,17 @@ const App = () => {
     }
     //                                   FINAL MAIN PAGE DISPLAY
     //--------------------------------------------------------------------------------------------------
+
+    const displayOneSpringData = (dataToDisplay) => {
+        if (dataToDisplay === "I AM DATA") {
+            return (
+                <>
+                    <h1>{dataToDisplay} FROM ONESPRING! </h1>
+                </>
+            )
+        }
+    }
+
     return (
         <div>
             {
@@ -438,6 +468,9 @@ const App = () => {
             }
             {
                 waiting(arrayOfWebPageData.isDataWaiting)
+            }
+            {
+                displayOneSpringData(arrayOfWebPageData.data)
             }
             <PageList arrayOfWebPageData={soughtList} handleWebData={handleWebData} />
         </div>
